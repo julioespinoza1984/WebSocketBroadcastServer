@@ -18,8 +18,7 @@ public class ChatEndPoint {
     private static Map<String, String> users = new HashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
-        System.out.println("Entrando a onOpen - username = " + username);
+    public void onOpen(Session session, @PathParam("username") String username) {
         this.session = session;
         chatEndPoints.add(this);
         users.put(session.getId(), username);
@@ -28,34 +27,30 @@ public class ChatEndPoint {
         message.setFrom(username);
         message.setContent("Connected!");
         broadcast(message);
-        System.out.println("Saliendo de onOpen");
     }
 
     @OnMessage
-    public void onMessage(Session session, Message message) throws IOException, EncodeException {
-        System.out.println("Entrando a onMessagge");
+    public void onMessage(Session session, Message message) {
         message.setFrom(users.get(session.getId()));
         broadcast(message);
-        System.out.println("Saliendo de onMessage");
     }
 
     @OnClose
-    public void onClose(Session session) throws IOException, EncodeException {
-        System.out.println("Entrando a onClose");
+    public void onClose(Session session) {
         chatEndPoints.remove(this);
         Message message = new Message();
         message.setFrom(users.get(session.getId()));
         message.setContent("Disconnected!");
         broadcast(message);
-        System.out.println("Saliendo de onClose");
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+        throwable.printStackTrace();
         // Do error handling here
     }
 
-    private static void broadcast(Message message) throws IOException, EncodeException {
+    private static void broadcast(Message message) {
         chatEndPoints.forEach(endpoint -> {
             synchronized (endpoint) {
                 try {
